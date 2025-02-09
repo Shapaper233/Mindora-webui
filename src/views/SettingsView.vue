@@ -1,19 +1,35 @@
 <template>
   <div class="settings-view">
-    <h2 class="section-title">主题设置</h2>
+    <h2 class="section-title">{{ $t("settings.title") }}</h2>
     <div class="color-picker-group">
-      <label>主题颜色：</label>
-      <input type="color" :value="themeColor" @input="updateThemeColor($event.target.value)">
+      <label>{{ $t("settings.theme_color") }}：</label>
+      <input
+        type="color"
+        :value="themeColor"
+        @input="updateThemeColor($event.target.value)"
+      />
     </div>
 
     <div class="settings-card">
-      <h3 class="card-title">界面偏好</h3>
+      <h3 class="card-title">{{ $t("settings.interface_prefs") }}</h3>
       <div class="form-item">
-        <label>菜单动画速度</label>
+        <label>{{ $t("settings.menu_speed") }}</label>
         <select v-model="animationSpeed">
-          <option value="fast">快速</option>
-          <option value="normal">正常</option>
-          <option value="slow">慢速</option>
+          <option value="fast">{{ $t("settings.fast") }}</option>
+          <option value="normal">{{ $t("settings.normal") }}</option>
+          <option value="slow">{{ $t("settings.slow") }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 语言切换 -->
+    <div class="settings-card">
+      <h3 class="card-title">{{ $t("settings.language_settings") }}</h3>
+      <div class="form-item">
+        <label>{{ $t("settings.select_language") }}</label>
+        <select v-model="currentLanguage" @change="changeLanguage">
+          <option value="zh-CN">{{ $t("settings.chinese") }}</option>
+          <option value="en-US">{{ $t("settings.english") }}</option>
         </select>
       </div>
     </div>
@@ -21,17 +37,35 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useThemeStore } from '@/stores/theme'
+import { ref } from "vue";
+import { useThemeStore } from "@/stores/theme";
+import { useI18n } from "vue-i18n";
+import { storeToRefs } from "pinia";
 
-const themeStore = useThemeStore()
-const themeColor = ref(themeStore.primaryColor)
-const animationSpeed = ref('normal')
+const { locale } = useI18n();
+const themeStore = useThemeStore();
+const { locale: currentLanguage } = storeToRefs(themeStore);
+
+// 确保 currentLanguage 有默认值
+if (!currentLanguage.value) {
+  currentLanguage.value = locale.value || 'zh-CN';
+}
+
+const themeColor = ref(themeStore.primaryColor);
+const animationSpeed = ref("normal");
+
+const changeLanguage = (event) => {
+  const newLang = event.target.value;
+  locale.value = newLang;
+  themeStore.setLanguage(newLang);
+  // 刷新页面让菜单语言生效
+  //window.location.reload();
+};
 
 const updateThemeColor = (color) => {
-  themeStore.setPrimaryColor(color)
-  themeColor.value = color
-}
+  themeStore.setPrimaryColor(color);
+  themeColor.value = color;
+};
 </script>
 
 <style scoped>
@@ -52,7 +86,7 @@ const updateThemeColor = (color) => {
   background: var(--card-bg);
   border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-top: 1.5rem;
 }
 
@@ -73,7 +107,7 @@ const updateThemeColor = (color) => {
   align-items: center;
   gap: 1rem;
   margin: 1.5rem 0;
-  
+
   input[type="color"] {
     width: 40px;
     height: 40px;

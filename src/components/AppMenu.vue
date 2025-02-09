@@ -1,57 +1,79 @@
 <script setup>
-import { useThemeStore } from '@/stores/theme'
-import { RouterLink } from 'vue-router'
+import { useThemeStore } from "@/stores/theme";
+import { RouterLink } from "vue-router";
+import { useI18n } from 'vue-i18n'
+import HomeIcon from "@/assets/icons/home.svg";
+import SettingsIcon from "@/assets/icons/settings.svg";
+import CollapseIcon from "@/assets/icons/collapse.svg";
 
-const theme = useThemeStore()
+import { computed, onMounted } from 'vue'
+const themeStore = useThemeStore()
 
-// 菜单项配置
-const topMenu = [
-  { name: 'Home', icon: '🏠', path: '/' }
-]
+// 设置默认语言为 'zh-CN'
+if (!themeStore.locale) {
+  themeStore.locale = 'zh-CN'
+}
 
-const bottomMenu = [
-  { name: 'Settings', icon: '⚙️', path: '/settings' },
-  { 
-    name: 'Collapse', 
-    icon: '↔️', 
-    action: () => theme.toggleMenu()
+const { t } = useI18n()
+
+// 响应式菜单项配置
+const topMenu = computed(() => [
+  { name: t("menu.home"), path: "/" }
+])
+
+const bottomMenu = computed(() => [
+  { name: t("menu.settings"), path: "/settings" },
+  {
+    name: themeStore.isMenuCollapsed ? t("common.expand") : t("common.collapse"),
+    action: themeStore.toggleMenu
   }
-]
+]);
+
+// 监听语言变化事件
+onMounted(() => {
+  window.addEventListener('language-changed', () => {
+    // 强制重新计算翻译
+    themeStore.locale = themeStore.locale === 'zh-CN' ? 'en-US' : 'zh-CN'
+    themeStore.locale = themeStore.locale === 'en-US' ? 'zh-CN' : 'en-US'
+  })
+})
 </script>
 
 <template>
-  <nav class="side-menu" :class="{ collapsed: theme.isMenuCollapsed }" :style="{ width: theme.cssVariables['--menu-width'] }">
+  <nav
+    class="side-menu"
+    :class="{ collapsed: themeStore.isMenuCollapsed }"
+    :style="{ width: themeStore.cssVariables['--menu-width'] }"
+  >
     <!-- 顶部菜单 -->
     <div class="menu-section top">
-      <RouterLink 
-        v-for="item in topMenu" 
-        :key="item.path" 
+      <RouterLink
+        v-for="item in topMenu"
+        :key="item.path"
         :to="item.path"
         class="menu-item"
       >
-        <span class="icon">{{ item.icon }}</span>
-        <span class="text" v-show="!theme.isMenuCollapsed">{{ item.name }}</span>
+          <HomeIcon class="icon" />
+        <span class="text" v-show="!themeStore.isMenuCollapsed">{{
+          item.name
+        }}</span>
       </RouterLink>
     </div>
 
     <!-- 底部菜单 -->
     <div class="menu-section bottom">
       <template v-for="item in bottomMenu" :key="item.path">
-        <RouterLink 
-          v-if="item.path"
-          :to="item.path"
-          class="menu-item"
-        >
-          <span class="icon">{{ item.icon }}</span>
-          <span class="text" v-show="!theme.isMenuCollapsed">{{ item.name }}</span>
+        <RouterLink v-if="item.path" :to="item.path" class="menu-item">
+          <SettingsIcon class="icon" />
+          <span class="text" v-show="!themeStore.isMenuCollapsed">{{
+            item.name
+          }}</span>
         </RouterLink>
-        <button
-          v-else
-          @click="item.action()"
-          class="menu-item"
-        >
-          <span class="icon">{{ item.icon }}</span>
-          <span class="text" v-show="!theme.isMenuCollapsed">{{ item.name }}</span>
+        <button v-else @click="item.action()" class="menu-item">
+          <CollapseIcon class="icon" />
+          <span class="text" v-show="!themeStore.isMenuCollapsed">{{
+            item.name
+          }}</span>
         </button>
       </template>
     </div>
@@ -63,12 +85,12 @@ const bottomMenu = [
   position: fixed;
   height: 100vh;
   background: white;
-  box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
   transition: width 0.3s ease;
   display: flex;
   flex-direction: column;
   z-index: 100;
-  min-width: 4rem;  /* 增加最小宽度保证折叠状态下的显示 */
+  min-width: 4rem; /* 增加最小宽度保证折叠状态下的显示 */
   max-width: 18rem; /* 增加最大宽度限制 */
 }
 
@@ -108,11 +130,12 @@ const bottomMenu = [
 }
 
 .icon {
-  font-size: 1.5rem;
-  min-width: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
   flex-shrink: 0;
   margin-right: 0.75rem;
-  text-align: center;
+  color: currentColor;
+  stroke: currentColor;
   transition: margin 0.3s ease;
 }
 
@@ -132,7 +155,7 @@ const bottomMenu = [
     background: transparent; /* 重置按钮背景 */
     border: none; /* 移除默认边框 */
   }
-  
+
   .icon {
     margin: 0;
     flex: none;

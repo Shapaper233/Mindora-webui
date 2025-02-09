@@ -6,7 +6,7 @@ const theme = useThemeStore()
 </script>
 
 <template>
-  <div class="app-container" :style="theme.cssVariables">
+  <div class="app-container" :style="theme.cssVariables" :dir="$i18n.locale === 'ar' ? 'rtl' : 'ltr'">
     <!-- 侧边菜单 -->
     <AppMenu />
     
@@ -32,9 +32,15 @@ const theme = useThemeStore()
 .main-content {
   flex: 1;
   padding: 2rem;
-  margin-left: var(--menu-width);
+  margin-left: var(--menu-width, 240px); /* 添加默认值 */
   transition: margin-left 0.3s ease;
   min-height: calc(100vh - 4rem);
   overflow-y: auto;
+}
+
+/* RTL布局支持 */
+[dir="rtl"] .main-content {
+  margin-left: 0;
+  margin-right: var(--menu-width, 240px);
 }
 </style>
