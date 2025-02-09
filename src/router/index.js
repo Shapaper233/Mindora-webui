@@ -2,19 +2,24 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import SettingsView from '@/views/SettingsView.vue'
 
-// 路由配置
+// 应用路由配置
+// 基础路由结构，包含页面过渡效果元数据
 const routes = [
+  /* 首页路由 */
   {
     path: '/',
     name: 'home',
     component: HomeView,
-    meta: { transition: 'slide-fade' }
+    // 页面过渡动画配置
+    meta: { transition: 'slide-fade' } // 使用slide-fade过渡效果
   },
+  /* 设置页路由 */
   {
     path: '/settings',
     name: 'settings',
     component: SettingsView,
-    meta: { transition: 'slide-fade' }
+    // 统一使用相同的过渡效果
+    meta: { transition: 'slide-fade' } 
   }
 ]
 
