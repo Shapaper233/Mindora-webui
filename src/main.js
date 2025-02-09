@@ -20,7 +20,7 @@ const i18n = createI18n({
     'en-US': enUS
   }
 })
-console.log(i18n.locale);
+
 // 创建应用实例
 const app = createApp(App)
 const pinia = createPinia()
