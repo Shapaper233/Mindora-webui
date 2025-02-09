@@ -28,8 +28,8 @@
       <div class="form-item">
         <label>{{ $t("settings.select_language") }}</label>
         <select v-model="currentLanguage" @change="changeLanguage">
-          <option value="zh-CN">{{ $t("settings.chinese") }}</option>
-          <option value="en-US">{{ $t("settings.english") }}</option>
+          <option value="zh-CN">{{ $t("languages.zh_CN") }}</option>
+          <option value="en-US">{{ $t("languages.en_US") }}</option>
         </select>
       </div>
     </div>

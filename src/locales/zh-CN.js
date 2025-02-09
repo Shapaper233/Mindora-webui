@@ -18,7 +18,9 @@ export default {
     slow: "慢",
     language_settings: "语言设置",
     select_language: "选择语言",
-    chinese: "中文",
-    english: "English",
+  },
+  languages: {
+    zh_CN: "简体中文",
+    en_US: "美式英语",
   },
 };
