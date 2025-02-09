@@ -17,7 +17,7 @@ export default {
     slow: "Slow",
     language_settings: "Language Settings",
     select_language: "Select Language",
-    chinese: "Chinese",
+    chinese: "中文",
     english: "English"
   },
 };

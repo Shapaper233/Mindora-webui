@@ -19,6 +19,6 @@ export default {
     language_settings: "语言设置",
     select_language: "选择语言",
     chinese: "中文",
-    english: "英文",
+    english: "English",
   },
 };
