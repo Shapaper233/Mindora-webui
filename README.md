@@ -1,5 +1,51 @@
-# Vue 3 + Vite
+# Mindora智元（Web UI）🚧
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Mindora（Web UI）智能图片管理系统，AI驱动的图片管理解决方案前端实现，当前为开发初期阶段
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## 🌟 规划特性
+
+### 基础功能
+- ⏰ 时间轴浏览（EXIF解析待实现）
+- 🗺️ 地图模式（需要GPS数据支持）
+- 🔍 混合搜索：
+  - 自然语言描述搜索（规划中）
+  - 以图搜图（开发中）
+  - 视频语音搜索（仅限视频内容，待实现）
+
+## 🛠️ 技术栈
+
+### 前端
+- Vue3 + Vite + Pinia
+
+## 🚀 快速开始
+
+### 环境要求
+- Node.js 18+
+
+### 安装步骤
+```bash
+# 克隆仓库
+git clone https://github.com/<your-repo>.git
+
+npm install
+
+# 启动开发服务器
+npm run dev
+```
+
+## 📌 注意事项
+⚠️ 当前为原型开发阶段，以下功能尚未实现：
+- AI集成接口
+- 视频处理模块
+- 地图可视化组件
+- 高级搜索功能
+
+## 🤝 贡献指南
+欢迎通过Issue提交建议，代码贡献请：
+1. 创建分支
+2. 保持代码风格统一
+
+## 📄 许可证
+[待确定] 项目正式发布前补充
+
+> 📧 联系维护者：shapeper@126.com
