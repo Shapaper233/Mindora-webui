@@ -20,14 +20,50 @@
 
 2. 应用初始化阶段：
    ```mermaid
-   sequenceDiagram
-       index.html->>main.js: 加载入口文件
-       main.js->>App.vue: 创建根组件
-       App.vue->>AppLayout.vue: 初始化布局组件
-       AppLayout.vue->>AppMenu.vue: 加载导航菜单
-       AppLayout.vue->>RouterView: 渲染路由内容
-       RouterView->>HomeView/SettingsView: 根据路由匹配组件
+   graph TD
+       A[index.html] --> B(main.js)
+       B --> C[初始化Vue应用]
+       C --> D[挂载全局配置]
+       D --> D1[路由系统]
+       D --> D2[状态管理]
+       D --> D3[多语言配置]
+       C --> E[注册全局组件]
+       C --> F[加载环境变量]
+       C --> G[注入CSS变量]
+       C --> H[挂载根组件App.vue]
+       H --> I[AppLayout布局初始化]
+       I --> I1[导航菜单初始化]
+       I --> I2[路由视图容器初始化]
+       I2 --> J[路由匹配]
+       J --> J1[HomeView]
+       J --> J2[SettingsView]
+       
+       style A fill:#4CAF50,stroke:#388E3C
+       style B fill:#2196F3,stroke:#1976D2
+       style C fill:#9C27B0,stroke:#7B1FA2
    ```
+
+   详细初始化步骤：
+   1. 环境准备阶段
+      - 加载Vite环境变量（import.meta.env）
+      - 检测浏览器语言偏好
+      - 初始化CSS自定义属性
+
+   2. 核心模块挂载
+      ```javascript
+      // main.js 典型配置
+      const app = createApp(App)
+         .use(createPinia()) // 状态管理
+         .use(router)       // 路由系统
+         .use(i18n)         // 多语言
+         .use(IconPlugin)   // SVG图标组件
+      ```
+
+   3. DOM挂载阶段
+      - 检测#app容器存在性
+      - 注入全局错误处理
+      - 挂载前执行路由守卫
+      - 调用mount('#app')
 
 ## 目录结构解析
 ```
