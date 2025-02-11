@@ -1,42 +1,40 @@
 <script setup>
 import { useThemeStore } from "@/stores/theme";
 import { RouterLink } from "vue-router";
-import { useI18n } from 'vue-i18n'
+import { useI18n } from "vue-i18n";
 import HomeIcon from "@/assets/icons/home.svg";
 import SettingsIcon from "@/assets/icons/settings.svg";
 import CollapseIcon from "@/assets/icons/collapse.svg";
 
-import { computed, onMounted } from 'vue'
-const themeStore = useThemeStore()
+import { computed, onMounted } from "vue";
+const themeStore = useThemeStore();
 
-// 设置默认语言为 'zh-CN'
-if (!themeStore.locale) {
-  themeStore.locale = 'zh-CN'
-}
-
-const { t } = useI18n()
+const { t } = useI18n();
 
 // 响应式菜单项配置
 const topMenu = computed(() => [
-  { name: t("menu.home"), path: "/" }
-])
+  { name: t("menu.home"), path: "/", icon: HomeIcon },
+]);
 
 const bottomMenu = computed(() => [
-  { name: t("menu.settings"), path: "/settings" },
+  { name: t("menu.settings"), path: "/settings", icon: SettingsIcon },
   {
-    name: themeStore.isMenuCollapsed ? t("common.expand") : t("common.collapse"),
-    action: themeStore.toggleMenu
-  }
+    name: themeStore.isMenuCollapsed
+      ? t("common.expand")
+      : t("common.collapse"),
+    action: themeStore.toggleMenu,
+    icon: CollapseIcon,
+  },
 ]);
 
 // 监听语言变化事件
 onMounted(() => {
-  window.addEventListener('language-changed', () => {
+  window.addEventListener("language-changed", () => {
     // 强制重新计算翻译
-    themeStore.locale = themeStore.locale === 'zh-CN' ? 'en-US' : 'zh-CN'
-    themeStore.locale = themeStore.locale === 'en-US' ? 'zh-CN' : 'en-US'
-  })
-})
+    themeStore.locale = themeStore.locale === "zh-CN" ? "en-US" : "zh-CN";
+    themeStore.locale = themeStore.locale === "en-US" ? "zh-CN" : "en-US";
+  });
+});
 </script>
 
 <template>
@@ -53,7 +51,8 @@ onMounted(() => {
         :to="item.path"
         class="menu-item"
       >
-          <HomeIcon class="icon" />
+        <!-- 动态渲染图标 -->
+        <component :is="item.icon" class="icon" />
         <span class="text" v-show="!themeStore.isMenuCollapsed">{{
           item.name
         }}</span>
@@ -62,15 +61,17 @@ onMounted(() => {
 
     <!-- 底部菜单 -->
     <div class="menu-section bottom">
-      <template v-for="item in bottomMenu" :key="item.path">
+      <template v-for="item in bottomMenu" :key="item.path || item.name">
         <RouterLink v-if="item.path" :to="item.path" class="menu-item">
-          <SettingsIcon class="icon" />
+          <!-- 动态渲染图标 -->
+          <component :is="item.icon" class="icon" />
           <span class="text" v-show="!themeStore.isMenuCollapsed">{{
             item.name
           }}</span>
         </RouterLink>
         <button v-else @click="item.action()" class="menu-item">
-          <CollapseIcon class="icon" />
+          <!-- 动态渲染图标 -->
+          <component :is="item.icon" class="icon" />
           <span class="text" v-show="!themeStore.isMenuCollapsed">{{
             item.name
           }}</span>
