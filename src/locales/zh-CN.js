@@ -1,8 +1,8 @@
 export default {
   menu: {
     home: "首页",
-    settings: "设置",
-    language: "语言",
+    settings: "设置", 
+    test: "测试",
   },
   common: {
     collapse: "收起",

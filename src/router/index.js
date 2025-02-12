@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
 import SettingsView from "@/views/SettingsView.vue";
+import TestView from "@/views/TestView.vue";
 
-// 应用路由配置
 const routes = [
   {
     path: "/",
@@ -11,8 +11,13 @@ const routes = [
   },
   {
     path: "/settings",
-    name: "settings",
+    name: "settings", 
     component: SettingsView,
+  },
+  {
+    path: "/test",
+    name: "test",
+    component: TestView,
   },
 ];
 
