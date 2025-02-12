@@ -60,7 +60,7 @@ const generatePhotos = () => {
       .fill(null)
       .map((_, index) => ({
         id: `${date}-${index}`,
-        url: `https://picsum.photos/seed/${date}-${index}/400/400`,
+        url: `/public/images/${index+1}.jpg`,//使用public内的图片
         date,
       }));
   });
