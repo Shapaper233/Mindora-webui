@@ -1,21 +1,25 @@
 <script setup>
-import { useThemeStore } from '@/stores/theme'
-import AppMenu from './AppMenu.vue'
+import { useThemeStore } from "@/stores/theme";
+import AppMenu from "./AppMenu.vue";
+import { useRouter } from "vue-router";
 
-const theme = useThemeStore()
+const theme = useThemeStore();
+const router = useRouter();
 </script>
 
 <template>
-  <div class="app-container" :style="theme.cssVariables" :dir="$i18n.locale === 'ar' ? 'rtl' : 'ltr'">
+  <div
+    class="app-container"
+    :style="theme.cssVariables"
+    :dir="$i18n.locale === 'ar' ? 'rtl' : 'ltr'"
+  >
     <!-- 侧边菜单 -->
     <AppMenu />
-    
+
     <!-- 主内容区域 -->
     <main class="main-content">
-      <router-view v-slot="{ Component, route }">
-        <transition :name="route.meta.transition" mode="out-in">
-          <component :is="Component" />
-        </transition>
+      <router-view v-slot="{ Component }">
+        <component :is="Component" />
       </router-view>
     </main>
   </div>
