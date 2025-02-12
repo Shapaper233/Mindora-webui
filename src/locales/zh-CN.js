@@ -2,7 +2,7 @@ export default {
   menu: {
     home: "首页",
     settings: "设置", 
-    test: "测试",
+    timeline: "时间轴",
   },
   common: {
     collapse: "收起",

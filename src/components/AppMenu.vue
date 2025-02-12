@@ -3,7 +3,7 @@ import { useThemeStore } from "@/stores/theme";
 import { RouterLink } from "vue-router";
 import { useI18n } from "vue-i18n";
 import HomeIcon from "@/assets/icons/home.svg";
-import TestIcon from "@/assets/icons/test.svg";
+import TimelineIcon from "@/assets/icons/timeline.svg";
 import SettingsIcon from "@/assets/icons/settings.svg";
 import CollapseIcon from "@/assets/icons/collapse.svg";
 
@@ -15,7 +15,7 @@ const { t } = useI18n();
 // 响应式菜单项配置
 const topMenu = computed(() => [
   { name: t("menu.home"), path: "/", icon: HomeIcon },
-  { name: t("menu.test"), path: "/test", icon: TestIcon },
+  { name: t("menu.timeline"), path: "/timeline", icon: TimelineIcon },
 ]);
 
 const bottomMenu = computed(() => [

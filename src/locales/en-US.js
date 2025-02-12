@@ -2,7 +2,7 @@ export default {
   menu: {
     home: "Home",
     settings: "Settings",
-    test: "Test",
+    timeline: "Timeline",
   },
   common: {
     collapse: "Collapse",
