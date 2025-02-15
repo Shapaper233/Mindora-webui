@@ -35,7 +35,7 @@ const router = useRouter();
 
 .main-content {
   flex: 1;
-  padding: 2rem;
+  padding: 0.3rem;
   margin-left: var(--menu-width, 240px); /* 添加默认值 */
   transition: margin-left 0.3s ease;
   min-height: calc(100vh - 4rem);
