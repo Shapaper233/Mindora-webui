@@ -23,4 +23,12 @@ export default {
     zh_CN: "简体中文",
     en_US: "美式英语",
   },
+  login: {
+    welcome: "欢迎回来",
+    email: "邮箱",
+    password: "密码",
+    email_placeholder: "请输入邮箱",
+    password_placeholder: "请输入密码",
+    sign_in: "登录"
+  },
 };

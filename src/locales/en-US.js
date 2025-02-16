@@ -23,4 +23,12 @@ export default {
     zh_CN: "Simplified Chinese",
     en_US: "American English",
   },
+  login: {
+    welcome: "Welcome Back",
+    email: "Email",
+    password: "Password",
+    email_placeholder: "Enter your email",
+    password_placeholder: "Enter your password",
+    sign_in: "Sign In"
+  },
 };

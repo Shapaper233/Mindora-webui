@@ -1,27 +1,27 @@
 <template>
     <div class="login-view">
         <div class="login-card">
-            <h1>Welcome Back</h1>
+            <h1>{{ $t('login.welcome') }}</h1>
             <form @submit.prevent="login">
                 <div class="form-group">
-                    <label>Email</label>
+                    <label>{{ $t('login.email') }}</label>
                     <input 
                         type="email" 
                         v-model="email" 
-                        placeholder="Enter your email"
+                        :placeholder="$t('login.email_placeholder')"
                         required
                     />
                 </div>
                 <div class="form-group">
-                    <label>Password</label>
+                    <label>{{ $t('login.password') }}</label>
                     <input 
                         type="password" 
                         v-model="password" 
-                        placeholder="Enter your password"
+                        :placeholder="$t('login.password_placeholder')"
                         required
                     />
                 </div>
-                <button type="submit" class="login-btn">Sign In</button>
+                <button type="submit" class="login-btn">{{ $t('login.sign_in') }}</button>
             </form>
         </div>
     </div>
@@ -29,6 +29,12 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useThemeStore } from '@/stores/theme'
+
+const { t } = useI18n()
+const themeStore = useThemeStore()
+const theme = themeStore.currentTheme
 
 const email = ref('')
 const password = ref('')
@@ -38,7 +44,7 @@ const login = () => {
     console.log('Logging in with:', email.value)
     // Simulate API call
     setTimeout(() => {
-        alert('Login successful!')
+        alert(t('login.success'))
     }, 1000)
 }
 </script>
