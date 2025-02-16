@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { getDayPhotos, getWeekPhotos, getMonthPhotos, getYearPhotos } from '../api/photo';
+import { getPhotosByGranularity } from '../api/photo';
+import { formatGroupKey } from '../utils/dateFormatter';
 
 // 常量定义
 export const GROUP_BY = {
@@ -25,6 +26,7 @@ export const usePhotoStore = defineStore('photo', () => {
   const hasMore = ref(true);          
   const groupingMethod = ref(GROUP_BY.DAY);
   const loading = ref(false);         
+  const loadedDates = ref(new Set()); // 新增已加载日期记录
 
   // 日期工具函数
   const dateUtils = {
@@ -37,42 +39,6 @@ export const usePhotoStore = defineStore('photo', () => {
         dates.push(d.toISOString().split('T')[0]);
       }
       return dates;
-    },
-
-    getWeekKey(date) {
-      const d = new Date(date);
-      const yearStart = new Date(d.getFullYear(), 0, 1);
-      const weekNumber = Math.ceil(((d - yearStart) / 86400000 + yearStart.getDay() + 1) / 7);
-      return `${d.getFullYear()}-W${weekNumber}`;
-    },
-
-    getMonthKey(date) {
-      const d = new Date(date);
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    },
-
-    getYearKey(date) {
-      const d = new Date(date);
-      return `${d.getFullYear()}`;
-    },
-
-    // 获取日期键值的时间戳（用于排序）
-    getKeyTimestamp(key, groupBy) {
-      switch (groupBy) {
-        case GROUP_BY.DAY:
-          return new Date(key).getTime();
-        case GROUP_BY.WEEK:
-          const [year, week] = key.split('-W');
-          const timestamp = new Date(year);
-          timestamp.setDate(timestamp.getDate() + (week - 1) * 7);
-          return timestamp.getTime();
-        case GROUP_BY.MONTH:
-          return new Date(key + '-01').getTime();
-        case GROUP_BY.YEAR:
-          return new Date(key + '-01-01').getTime();
-        default:
-          return 0;
-      }
     }
   };
 
@@ -82,44 +48,77 @@ export const usePhotoStore = defineStore('photo', () => {
     hasMore.value = true;
     loading.value = false;
     photos.value = [];
+    loadedDates.value.clear(); // 重置时清空已加载记录
   };
   const fetchPhotos = async (isInitial = false) => {
     if (loading.value || !hasMore.value) return;
     
     loading.value = true;
     try {
-      let newPhotos;
-      const params = isInitial ? 1 : Math.ceil(LOAD_DAYS[groupingMethod.value] / 30);
-
-      switch (groupingMethod.value) {
-        case GROUP_BY.DAY:
-          newPhotos = await getDayPhotos(currentDate.value, LOAD_DAYS[GROUP_BY.DAY]);
-          break;
-        case GROUP_BY.WEEK:
-          newPhotos = await getWeekPhotos(currentDate.value, params);
-          break;
-        case GROUP_BY.MONTH:
-          newPhotos = await getMonthPhotos(currentDate.value, params);
-          break;
-        case GROUP_BY.YEAR:
-          newPhotos = await getYearPhotos(currentDate.value, params);
-          break;
-        default:
-          newPhotos = await getDayPhotos(currentDate.value, LOAD_DAYS[GROUP_BY.DAY]);
+      const days = LOAD_DAYS[groupingMethod.value];
+      // 生成当前请求的日期范围
+      const datesToLoad = dateUtils.generateDates(
+        currentDate.value, 
+        days
+      ).filter(date => !loadedDates.value.has(date)); // 过滤已加载日期
+      
+      if (datesToLoad.length === 0) {
+        hasMore.value = false;
+        return;
       }
 
-      photos.value = isInitial 
-        ? newPhotos
-        : [...photos.value, ...newPhotos].sort((a, b) => a.timestamp - b.timestamp);
+      const { photos: newPhotos, metadata } = await getPhotosByGranularity({
+        granularity: groupingMethod.value,
+        endDate: currentDate.value,
+        days
+      });
 
-      // Update current date based on loaded photos
-      const oldestPhoto = [...newPhotos].sort((a, b) => a.timestamp - b.timestamp)[0];
-      if (oldestPhoto) {
-        currentDate.value = new Date(oldestPhoto.date);
+      // 记录已加载的日期
+      datesToLoad.forEach(date => loadedDates.value.add(date));
+
+      // 处理元数据
+      photos.value = isInitial 
+        ? newPhotos.map(photo => ({
+            ...photo,
+            timestamp: new Date(photo.date).getTime(),
+            metadata: metadata[photo.id] || {}
+          }))
+        : [
+            ...photos.value,
+            ...newPhotos.map(photo => ({
+              ...photo,
+              timestamp: new Date(photo.originalDate || photo.date).getTime(),
+              metadata: metadata[photo.id] || {}
+            }))
+          ].sort((a, b) => a.timestamp - b.timestamp);
+
+      // 更新当前日期
+      if (newPhotos.length > 0) {
+        const lastDate = new Date(currentDate.value);
+        
+        // 根据时间粒度和配置天数递减日期
+        const daysToSubtract = LOAD_DAYS[groupingMethod.value];
+        switch(groupingMethod.value) {
+          case GROUP_BY.DAY:
+            lastDate.setDate(lastDate.getDate() - daysToSubtract);
+            break;
+          case GROUP_BY.WEEK:
+            lastDate.setDate(lastDate.getDate() - daysToSubtract);
+            break;
+          case GROUP_BY.MONTH:
+            lastDate.setMonth(lastDate.getMonth() - Math.floor(daysToSubtract/30));
+            break;
+          case GROUP_BY.YEAR:
+            lastDate.setFullYear(lastDate.getFullYear() - Math.floor(daysToSubtract/365));
+            break;
+          default:
+            lastDate.setDate(lastDate.getDate() - 1);
+        }
+        
+        currentDate.value = lastDate;
       } else {
         hasMore.value = false;
       }
-
     } finally {
       loading.value = false;
     }
@@ -132,46 +131,50 @@ export const usePhotoStore = defineStore('photo', () => {
   };
 
   const getGroupedPhotos = () => {
-    const grouped = {};
+    // 使用API返回的分组元数据
+    const groups = {};
     
-    // 按分组方式对照片进行分组
     photos.value.forEach(photo => {
-      let key;
-      switch (groupingMethod.value) {
-        case GROUP_BY.WEEK:
-          key = dateUtils.getWeekKey(photo.date);
-          break;
-        case GROUP_BY.MONTH:
-          key = dateUtils.getMonthKey(photo.date);
-          break;
-        case GROUP_BY.YEAR:
-          key = dateUtils.getYearKey(photo.date);
-          break;
-        default: // GROUP_BY.DAY
-          key = photo.date;
+      // Ensure groupKey is a valid string
+      let groupKey = photo.metadata.groupKey;
+      if (typeof groupKey !== 'string') {
+        groupKey = String(groupKey || '');
       }
       
-      if (!grouped[key]) {
-        grouped[key] = [];
+      // Use default groupKey if empty
+      if (!groupKey) {
+        groupKey = '未分类';
       }
-      grouped[key].push(photo);
+      
+      if (!groups[groupKey]) {
+        groups[groupKey] = {
+          period: groupKey,
+          photos: [],
+          metadata: {
+            count: 0,
+            firstPhoto: null,
+            lastPhoto: null
+          }
+        };
+      }
+      
+      groups[groupKey].photos.push(photo);
+      groups[groupKey].metadata.count++;
+      
+      if (!groups[groupKey].metadata.firstPhoto || 
+          photo.timestamp < groups[groupKey].metadata.firstPhoto.timestamp) {
+        groups[groupKey].metadata.firstPhoto = photo;
+      }
+      
+      if (!groups[groupKey].metadata.lastPhoto || 
+          photo.timestamp > groups[groupKey].metadata.lastPhoto.timestamp) {
+        groups[groupKey].metadata.lastPhoto = photo;
+      }
     });
-
-    // 确保每个分组内的照片按时间戳正序排列
-    Object.values(grouped).forEach(group => {
-      group.sort((a, b) => a.timestamp - b.timestamp);
-    });
-
-    // 将分组按日期键值倒序排列
-    const sortedGrouped = Object.fromEntries(
-      Object.entries(grouped).sort(([keyA], [keyB]) => {
-        const timestampA = dateUtils.getKeyTimestamp(keyA, groupingMethod.value);
-        const timestampB = dateUtils.getKeyTimestamp(keyB, groupingMethod.value);
-        return timestampA - timestampB;
-      })
+    
+    return Object.values(groups).sort((a, b) => 
+      a.metadata.firstPhoto.timestamp - b.metadata.firstPhoto.timestamp
     );
-
-    return sortedGrouped;
   };
 
   return {

@@ -20,10 +20,10 @@
         <div v-if="loading" class="loading">加载中...</div>
 
         <!-- 按日期分组的照片列表 -->
-        <div v-for="(group, groupKey) in groupedPhotos" :key="groupKey" class="date-group">
-          <h2 class="date-header">{{ formatGroupHeader(groupKey) }}</h2>
+        <div v-for="(group) in groupedPhotos" :key="group.period" class="date-group">
+          <h2 class="date-header">{{ group.period}}</h2>
           <PhotoGrid
-            :photos="group"
+            :photos="group.photos"
             :zoom-level="zoomLevel"
             @preview="openPreview"
           />
@@ -48,7 +48,6 @@ import { ref, computed, onMounted, watch, nextTick } from "vue";
 import { usePhotoStore, GROUP_BY } from '../stores/photo';
 import { throttle } from 'lodash-es';
 import PhotoGrid from '../components/PhotoGrid.vue';
-import { formatGroupHeader } from '../utils/dateFormatter';
 
 // 缩放配置常量
 const ZOOM_CONFIG = {
@@ -171,7 +170,7 @@ const throttledHandleScroll = throttle(handleScroll, 200);
 
 // 生命周期钩子
 onMounted(async () => {
-  await fetchPhotos(true);
+  await fetchPhotos();
   // 等待DOM更新后滚动到底部
   await nextTick();
   if (galleryRef.value) {
@@ -185,7 +184,7 @@ onMounted(async () => {
 watch(
   () => photoStore.groupingMethod,
   async (newMethod) => {
-  photoStore.resetLoadState();
+  //photoStore.resetLoadState();
   await fetchPhotos(true);
   // 重置后也需要检查一次滚动状态
   handleScroll({ target: galleryRef.value });

@@ -1,38 +1,34 @@
-/**
- * 从日期字符串中获取年份
- * @param {string} date - 日期字符串
- * @returns {number} 年份
- */
-export const getYearFromDate = (date) => {
-  return new Date(date).getFullYear();
-};
+export function formatGroupKey(dateString, granularity) {
+  const date = new Date(dateString);
+  const options = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'long'
+  };
 
-/**
- * 格式化分组标题
- * @param {string} groupKey - 分组键值
- * @returns {string} 格式化后的标题
- */
-export const formatGroupHeader = (groupKey) => {
-  if (groupKey.length === 4) {
-    // 年份格式: YYYY
-    return `${groupKey}年`;
-  } else if (groupKey.includes('-W')) {
-    // 周格式: YYYY-Wxx
-    const [year, weekPart] = groupKey.split('-W');
-    return `${year}年 第${weekPart}周`;
-  } else if (groupKey.length === 7) {
-    // 月份格式: YYYY-MM
-    const date = new Date(groupKey + '-01');
-    const monthFormatter = new Intl.DateTimeFormat("zh-CN", { month: "long" });
-    return `${date.getFullYear()}年 ${monthFormatter.format(date)}`;
-  } else {
-    // 日期格式: YYYY-MM-DD
-    const date = new Date(groupKey);
-    const formatter = new Intl.DateTimeFormat("zh-CN", {
-      month: "long",
-      day: "numeric",
-      weekday: "long"
-    });
-    return `${date.getFullYear()}年 ${formatter.format(date)}`;
+  // 获取中国时区配置
+  const zhOptions = { timeZone: 'Asia/Shanghai', ...options };
+
+  switch(granularity) {
+    case 'day':
+      return date.toLocaleDateString('zh-CN', zhOptions);
+    case 'week': {
+      const year = date.getFullYear();
+      const firstDayOfYear = new Date(year, 0, 1);
+      const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+      const weekNumber = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+      return `${year}年 第${weekNumber}周`;
+    }
+    case 'month':
+      return date.toLocaleDateString('zh-CN', { 
+        ...zhOptions, 
+        month: 'long', 
+        day: undefined 
+      }).replace('日', '');
+    case 'year':
+      return `${date.getFullYear()}年`;
+    default:
+      return date.toLocaleDateString('zh-CN', zhOptions);
   }
-};
+}
